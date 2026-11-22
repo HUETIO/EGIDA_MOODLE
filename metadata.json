@@ -1,0 +1,6 @@
+{
+  "name": "EGIDA_MOODLE — Diplomado en Ciberseguridad",
+  "description": "Plataforma educativa accesible e interactiva para el Diplomado en Ciberseguridad (30 horas, 15 bloques, simulación Red vs. Blue, TTX Sala de Crisis y gestión académica por roles).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
