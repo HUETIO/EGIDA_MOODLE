@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { apiFetch } from '../lib/api.ts';
 import type { UserRole } from '../shared/types.ts';
+import { DEMO_STORAGE_KEY, DEMO_USERS } from '../lib/demo.ts';
 
 type ManagedStatus = 'pendiente' | 'activo' | 'suspendido';
 type ManagedRole = UserRole;
@@ -45,6 +46,7 @@ const emptyNewUser = {
 };
 
 export function CoordinatorWorkspace({ currentUserId }: CoordinatorWorkspaceProps) {
+  const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [courses, setCourses] = useState<CourseOption[]>([]);
   const [drafts, setDrafts] = useState<Record<string, UserDraft>>({});
@@ -57,6 +59,30 @@ export function CoordinatorWorkspace({ currentUserId }: CoordinatorWorkspaceProp
   const loadUsers = useCallback(async () => {
     setLoading(true);
     setError(null);
+    if (DEMO_MODE) {
+      const demoUsers: ManagedUser[] = Object.values(DEMO_USERS).map((user) => ({
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        role: user.role,
+        status: user.status ?? 'activo',
+        profileContext: user.profileContext,
+        assignedCourseIds: user.assignedCourseIds,
+        enrolledCourseIds: user.enrolledCourseIds,
+      }));
+      setUsers(demoUsers);
+      setCourses([{ id: 'diplomado-ciberseguridad', code: 'EGIDA-CS-01', title: 'Diplomado en Ciberseguridad · 40 h' }]);
+      setDrafts(Object.fromEntries(demoUsers.map((user) => [
+        user.id,
+        {
+          role: user.role,
+          status: user.status,
+          courseIds: user.role === 'profesor' ? user.assignedCourseIds : user.enrolledCourseIds,
+        },
+      ])));
+      setLoading(false);
+      return;
+    }
     try {
       const data = await apiFetch<WorkspaceData>('/api/admin/users');
       setUsers(data.users);
@@ -93,6 +119,10 @@ export function CoordinatorWorkspace({ currentUserId }: CoordinatorWorkspaceProp
   };
 
   const saveUser = async (user: ManagedUser) => {
+    if (DEMO_MODE) {
+      setNotice(`Demostración: ${user.displayName} no requiere cambios reales.`);
+      return;
+    }
     const draft = drafts[user.id];
     if (!draft) return;
     setSavingUserId(user.id);
@@ -116,6 +146,11 @@ export function CoordinatorWorkspace({ currentUserId }: CoordinatorWorkspaceProp
     event.preventDefault();
     setError(null);
     setNotice(null);
+    if (DEMO_MODE) {
+      setNotice('Demostración: el alta de usuarios ficticios no se persiste ni crea cuentas reales.');
+      setNewUser(emptyNewUser);
+      return;
+    }
     try {
       await apiFetch('/api/admin/users', {
         method: 'POST',

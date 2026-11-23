@@ -148,11 +148,11 @@ export function CatalogView({
                   <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600 tabular-nums">
                     <span className="inline-flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-                      <span>70 % práctica (1260 min) / 30 % teoría (540 min)</span>
+                      <span>70 % práctica (1680 min) / 30 % teoría (720 min)</span>
                     </span>
                     <span className="inline-flex items-center gap-1.5">
                       <Layers className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-                      <span>6 módulos + Evaluación + Invitados</span>
+                      <span>6 módulos base + Evaluación + Invitados + Complementario</span>
                     </span>
                     <span className="font-medium text-slate-800">
                       Estado: {course.enrollmentStatusLabel}
@@ -200,24 +200,24 @@ export function CatalogView({
               <div>
                 <p className="text-xs font-medium text-slate-500">Estructura del programa</p>
                 <h3 className="mt-1 font-display text-lg font-semibold text-slate-900">
-                  Recorrido integral de 30 horas
+                  Recorrido integral de 40 horas
                 </h3>
                 <dl className="mt-4 space-y-3 border-t border-slate-100 pt-4 text-sm">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <dt className="text-slate-600">Componente formativo (B01–B13)</dt>
-                    <dd className="font-mono font-medium text-slate-900 tabular-nums">26 h</dd>
+                    <dt className="text-slate-600">Componente base (B01–B15)</dt>
+                    <dd className="font-mono font-medium text-slate-900 tabular-nums">30 h</dd>
                   </div>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <dt className="text-slate-600">Espacio de invitados (B14–B15)</dt>
-                    <dd className="font-mono font-medium text-slate-900 tabular-nums">4 h</dd>
+                    <dt className="text-slate-600">Fortalecimiento complementario (C01–C05)</dt>
+                    <dd className="font-mono font-medium text-slate-900 tabular-nums">10 h</dd>
                   </div>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <dt className="text-slate-600">Práctica guiada y simulación</dt>
-                    <dd className="font-mono font-medium text-slate-900 tabular-nums">70 % (21 h)</dd>
+                    <dd className="font-mono font-medium text-slate-900 tabular-nums">70 % (28 h)</dd>
                   </div>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <dt className="text-slate-600">Exposición teórica</dt>
-                    <dd className="font-mono font-medium text-slate-900 tabular-nums">30 % (9 h)</dd>
+                    <dd className="font-mono font-medium text-slate-900 tabular-nums">30 % (12 h)</dd>
                   </div>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <dt className="text-slate-600">Hilo conductor</dt>

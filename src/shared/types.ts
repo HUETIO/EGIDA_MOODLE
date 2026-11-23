@@ -88,7 +88,7 @@ export interface CourseResource {
 }
 
 export interface BlockSpec {
-  id: string; // B01..B15
+  id: string; // B01..B15 or C01..C05
   code: string;
   moduleId: string;
   order: number;
@@ -265,7 +265,7 @@ export interface CourseConfig {
     aiPolicyNote: string;
     provisionalStatus: boolean;
   };
-  scheduleMode: '8 jornadas (4 h)' | '15 sesiones (2 h)';
+  scheduleMode: '8 jornadas (4 h)' | '11 jornadas' | '15 sesiones (2 h)';
   published: boolean;
   generalCompetence: string;
   targetAudience: string;

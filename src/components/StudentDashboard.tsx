@@ -218,9 +218,9 @@ export function StudentDashboard({
       <div className="mt-8 min-w-0 border border-slate-200 bg-white p-6 break-words">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <h2 className="font-display text-base font-semibold text-slate-900">
-            Mapa rápido de los 15 bloques (B01–B15)
+            Mapa rápido de los 20 bloques (B01–B15 y C01–C05)
           </h2>
-          <span className="text-xs text-slate-500 tabular-nums">30 horas totales</span>
+          <span className="text-xs text-slate-500 tabular-nums">40 horas totales</span>
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {blocks.map((b) => {

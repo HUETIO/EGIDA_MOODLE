@@ -120,12 +120,12 @@ export function DiplomaOverview({
             </p>
             <div className="mt-5 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4 text-xs sm:grid-cols-4 tabular-nums">
               <div>
-                <p className="text-slate-500">Formación (B01–B13)</p>
+                <p className="text-slate-500">Componente base (B01–B15)</p>
                 <p className="mt-0.5 font-mono text-sm font-semibold text-slate-900">{course.formativeHours} h</p>
               </div>
               <div>
-                <p className="text-slate-500">Invitados (B14–B15)</p>
-                <p className="mt-0.5 font-mono text-sm font-semibold text-slate-900">{course.guestHours} h</p>
+                <p className="text-slate-500">Complementario (C01–C05)</p>
+                <p className="mt-0.5 font-mono text-sm font-semibold text-slate-900">10 h</p>
               </div>
               <div>
                 <p className="text-slate-500">Balance</p>
@@ -323,10 +323,10 @@ export function DiplomaOverview({
               <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
                 <div>
                   <h2 className="font-display text-lg font-semibold text-slate-900">
-                    Estructura curricular completa: 6 módulos, evaluación e invitados (30 h)
+                    Estructura curricular completa: 6 módulos base, evaluación, invitados y 5 bloques complementarios (40 h)
                   </h2>
                   <p className="text-xs text-slate-500 tabular-nums">
-                    15 bloques de 2 horas · 26 h de formación (B01–B13) + 4 h de invitados (B14–B15) · 540 min teoría / 1260 min práctica
+                    20 bloques de 2 horas · 30 h base (B01–B15) + 10 h complementarias (C01–C05) · 720 min teoría / 1680 min práctica
                   </p>
                 </div>
               </div>
@@ -426,7 +426,7 @@ export function DiplomaOverview({
                   Criterios de aprobación vigentes en estado provisional (pendiente de validación institucional · SO-6)
                 </p>
                 <p className="mt-1">
-                  Escala {course.gradingPolicy.scaleMin.toFixed(1)} a {course.gradingPolicy.scaleMax.toFixed(1)} · Umbral propuesto: nota final ≥ {course.gradingPolicy.passingScore.toFixed(1)}/5,0 y asistencia ≥ {course.gradingPolicy.minAttendancePercent} % (24/30 h). Coevaluación grupal configurable entre {course.gradingPolicy.coEvaluationMinFactor} y {course.gradingPolicy.coEvaluationMaxFactor}.
+                  Escala {course.gradingPolicy.scaleMin.toFixed(1)} a {course.gradingPolicy.scaleMax.toFixed(1)} · Umbral propuesto: nota final ≥ {course.gradingPolicy.passingScore.toFixed(1)}/5,0 y asistencia ≥ {course.gradingPolicy.minAttendancePercent} % (32/40 h). Coevaluación grupal configurable entre {course.gradingPolicy.coEvaluationMinFactor} y {course.gradingPolicy.coEvaluationMaxFactor}.
                 </p>
               </div>
             </div>

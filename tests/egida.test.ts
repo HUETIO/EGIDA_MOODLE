@@ -211,23 +211,23 @@ async function loginAs(_baseUrl: string, userId: string): Promise<string> {
   return userId;
 }
 
-test('1. Integridad curricular: 15 bloques, 30h (26h + 4h), 70% práctica / 30% teoría, pesos 100%', () => {
-  assert.equal(MODULES.length, 8);
-  assert.equal(BLOCKS.length, 15);
+test('1. Integridad curricular: 20 bloques, 40h (30h base + 10h complementarias), 70% práctica / 30% teoría, pesos 100%', () => {
+  assert.equal(MODULES.length, 9);
+  assert.equal(BLOCKS.length, 20);
 
   const totalMinutes = BLOCKS.reduce((acc, b) => acc + b.durationMinutes, 0);
   const theoryMinutes = BLOCKS.reduce((acc, b) => acc + b.theoryMinutes, 0);
   const practiceMinutes = BLOCKS.reduce((acc, b) => acc + b.practiceMinutes, 0);
-  assert.equal(totalMinutes, 1800); // 30 hours
-  assert.equal(theoryMinutes, 540); // 30%
-  assert.equal(practiceMinutes, 1260); // 70%
+  assert.equal(totalMinutes, 2400); // 40 hours
+  assert.equal(theoryMinutes, 720); // 30%
+  assert.equal(practiceMinutes, 1680); // 70%
 
-  const formativeHours = BLOCKS.slice(0, 13).reduce((acc, b) => acc + b.durationMinutes / 60, 0);
-  const guestHours = BLOCKS.slice(13, 15).reduce((acc, b) => acc + b.durationMinutes / 60, 0);
-  assert.equal(formativeHours, 26);
-  assert.equal(guestHours, 4);
+  const baseHours = BLOCKS.slice(0, 15).reduce((acc, b) => acc + b.durationMinutes / 60, 0);
+  const complementaryHours = BLOCKS.slice(15, 20).reduce((acc, b) => acc + b.durationMinutes / 60, 0);
+  assert.equal(baseHours, 30);
+  assert.equal(complementaryHours, 10);
 
-  assert.equal(LEARNING_OUTCOMES.length, 7);
+  assert.equal(LEARNING_OUTCOMES.length, 8);
   assert.equal(EVALUATION_COMPONENTS.reduce((a, c) => a + c.weightPercent, 0), 100);
   for (const rubric of RUBRICS) {
     assert.equal(

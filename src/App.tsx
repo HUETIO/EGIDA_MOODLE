@@ -8,7 +8,7 @@ import {
   signInWithPopup,
   signOut,
 } from 'firebase/auth';
-import { DEFAULT_COURSE_ID } from './shared/curriculum.ts';
+import { DEFAULT_COURSE_ID, INITIAL_COURSE_CONFIG } from './shared/curriculum.ts';
 import type {
   ActivityDefinition,
   AttendanceRecord,
@@ -43,6 +43,9 @@ import { TeacherWorkspace } from './components/TeacherWorkspace.tsx';
 import { InteractivesHub, type InteractiveToolId } from './components/interactives/InteractivesHub.tsx';
 import { CoordinatorWorkspace } from './components/CoordinatorWorkspace.tsx';
 import { getFirebaseAuth, isFirebaseConfigured } from './lib/firebase.ts';
+import { createDemoCoursePayload, DEMO_STORAGE_KEY, DEMO_USERS, getDemoRole, type DemoRole } from './lib/demo.ts';
+
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
 
 type ActiveRoute = 'catalog' | 'overview' | 'dashboard' | 'classroom' | 'interactives' | 'teacher' | 'admin';
 
@@ -121,7 +124,15 @@ export default function App() {
   const [largeText, setLargeText] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
 
+  const [demoRole, setDemoRole] = useState<DemoRole>(() => getDemoRole());
+
   // Sync accessibility preferences onto <html>
+  useEffect(() => {
+    if (DEMO_MODE) {
+      localStorage.setItem(DEMO_STORAGE_KEY, demoRole);
+    }
+  }, [demoRole]);
+
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle('a11y-large-text', largeText);
@@ -143,6 +154,37 @@ export default function App() {
   const loadWorkspace = useCallback(async (targetCourseId = selectedCourseId) => {
     setLoading(true);
     setErrorMsg(null);
+    if (DEMO_MODE) {
+      const demoUser = DEMO_USERS[demoRole];
+      const detail = createDemoCoursePayload(demoRole);
+      setUser(demoUser);
+      setAuthenticated(true);
+      setCourses([{
+        ...INITIAL_COURSE_CONFIG,
+        isEnrolled: demoUser.role === 'estudiante',
+        isAssignedProfessor: demoUser.role === 'profesor',
+        canEnterClassroom: true,
+        enrollmentStatusLabel: 'Modo demostración',
+      }]);
+      setSelectedCourseId(DEFAULT_COURSE_ID);
+      setCourseData(detail);
+      setForumPosts(detail.calendarEvents ? [{
+        id: 'demo-welcome',
+        courseId: DEFAULT_COURSE_ID,
+        channel: 'anuncios',
+        authorId: demoRole,
+        authorName: demoUser.displayName,
+        authorRole: 'profesor',
+        title: 'Bienvenida al demostrador',
+        body: 'Este entorno muestra el concepto completo con perfiles, actividades y datos ficticios.',
+        createdAt: '2026-11-23T10:00:00-05:00',
+        reported: false,
+        moderatedHidden: false,
+      }] : []);
+      setLoading(false);
+      setRoute(demoRole === 'estudiante' ? 'dashboard' : demoRole === 'profesor' ? 'teacher' : 'admin');
+      return;
+    }
     try {
       const [meRes, catRes, healthRes] = await Promise.all([
         apiFetch<{
@@ -190,7 +232,7 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [selectedCourseId]);
+  }, [selectedCourseId, demoRole]);
 
   useEffect(() => {
     let active = true;
@@ -234,6 +276,13 @@ export default function App() {
   };
 
   const handleSignOut = async () => {
+    if (DEMO_MODE) {
+      setAuthenticated(false);
+      setUser(DEMO_USERS.estudiante);
+      setRoute('catalog');
+      setAccountModalOpen(false);
+      return;
+    }
     const auth = getFirebaseAuth();
     if (!auth) return;
     try {
@@ -694,6 +743,10 @@ export default function App() {
             initialBlockId={classroomBlockId}
             initialTab={classroomTab}
             onSaveDraft={async (payload) => {
+              if (DEMO_MODE) {
+                setErrorMsg(null);
+                return;
+              }
               await apiFetch(`/api/courses/${courseData.course.id}/submissions/draft`, {
                 method: 'POST',
                 body: JSON.stringify(payload),
@@ -701,6 +754,10 @@ export default function App() {
               await loadWorkspace(courseData.course.id);
             }}
             onSubmitActivity={async (payload) => {
+              if (DEMO_MODE) {
+                setErrorMsg(null);
+                return;
+              }
               await apiFetch(`/api/courses/${courseData.course.id}/submissions/submit`, {
                 method: 'POST',
                 body: JSON.stringify(payload),
@@ -708,6 +765,20 @@ export default function App() {
               await loadWorkspace(courseData.course.id);
             }}
             onSubmitQuiz={async (quizId, answers) => {
+              if (DEMO_MODE) {
+                return {
+                  id: `demo-attempt-${quizId}`,
+                  courseId: courseData.course.id,
+                  quizId,
+                  studentId: user.id,
+                  attemptNumber: 1,
+                  answers,
+                  scorePercent: 80,
+                  scoreFiveScale: 4,
+                  diagnosticOnly: false,
+                  submittedAt: new Date().toISOString(),
+                };
+              }
               const res = await apiFetch<{ attempt: QuizAttemptRecord }>(
                 `/api/courses/${courseData.course.id}/quizzes/${quizId}/attempt`,
                 {
@@ -719,6 +790,7 @@ export default function App() {
               return res.attempt;
             }}
             onCreateForumPost={async (payload) => {
+              if (DEMO_MODE) return;
               await apiFetch(`/api/courses/${courseData.course.id}/forum`, {
                 method: 'POST',
                 body: JSON.stringify(payload),
@@ -726,6 +798,7 @@ export default function App() {
               await loadWorkspace(courseData.course.id);
             }}
             onReportForumPost={async (postId, reason) => {
+              if (DEMO_MODE) return;
               await apiFetch(`/api/courses/${courseData.course.id}/forum/${postId}/report`, {
                 method: 'POST',
                 body: JSON.stringify({ reason }),
@@ -748,6 +821,7 @@ export default function App() {
             initialTool={interactiveTool}
             savedProgress={courseData?.interactiveProgress as never}
             onSaveProgress={async (payload) => {
+              if (DEMO_MODE) return;
               await apiFetch(`/api/courses/${selectedCourseId}/interactives/progress`, {
                 method: 'POST',
                 body: JSON.stringify(payload),
@@ -783,6 +857,7 @@ export default function App() {
             }
             adaptersHealth={adaptersHealth}
             onGradeSubmission={async (payload) => {
+              if (DEMO_MODE) return;
               await apiFetch(`/api/courses/${courseData.course.id}/teacher/grade`, {
                 method: 'POST',
                 body: JSON.stringify(payload),
@@ -790,6 +865,7 @@ export default function App() {
               await loadWorkspace(courseData.course.id);
             }}
             onRemindStudents={async (payload) => {
+              if (DEMO_MODE) return 0;
               const res = await apiFetch<{ sentCount: number }>(
                 `/api/courses/${courseData.course.id}/teacher/remind`,
                 {
@@ -801,6 +877,7 @@ export default function App() {
               return res.sentCount;
             }}
             onRecordAttendance={async (payload) => {
+              if (DEMO_MODE) return;
               await apiFetch(`/api/courses/${courseData.course.id}/teacher/attendance`, {
                 method: 'POST',
                 body: JSON.stringify(payload),
@@ -808,6 +885,7 @@ export default function App() {
               await loadWorkspace(courseData.course.id);
             }}
             onToggleBlockFlag={async (blockId, patch) => {
+              if (DEMO_MODE) return;
               await apiFetch(`/api/courses/${courseData.course.id}/teacher/blocks/${blockId}`, {
                 method: 'PATCH',
                 body: JSON.stringify(patch),
@@ -815,6 +893,7 @@ export default function App() {
               await loadWorkspace(courseData.course.id);
             }}
             onRotateTeam={async (teamId, blockId) => {
+              if (DEMO_MODE) return;
               await apiFetch(`/api/courses/${courseData.course.id}/teacher/teams/${teamId}/rotate`, {
                 method: 'POST',
                 body: JSON.stringify({ blockId }),
@@ -822,6 +901,7 @@ export default function App() {
               await loadWorkspace(courseData.course.id);
             }}
             onUpdateConfig={async (patch) => {
+              if (DEMO_MODE) return;
               await apiFetch(`/api/courses/${courseData.course.id}/teacher/config`, {
                 method: 'PATCH',
                 body: JSON.stringify(patch),
@@ -829,6 +909,9 @@ export default function App() {
               await loadWorkspace(courseData.course.id);
             }}
             onExportReport={async () => {
+              if (DEMO_MODE) {
+                return { demo: true, course: courseData.course.id, totalBlocks: courseData.blocks.length };
+              }
               const res = await apiFetch<Record<string, unknown>>(
                 `/api/courses/${courseData.course.id}/teacher/export`
               );
@@ -875,6 +958,39 @@ export default function App() {
                   {user.status && ` · Estado: ${user.status}`}
                 </p>
                 <p className="mt-1 text-slate-600">{user.profileContext}</p>
+              </div>
+            )}
+
+            {DEMO_MODE && (
+              <div className="mt-4 border border-blue-200 bg-blue-50 p-3">
+                <p className="text-xs font-semibold text-blue-950">Demostración pública de perfiles</p>
+                <p className="mt-1 text-xs text-blue-900">
+                  Cambia el perfil para explorar estudiantes, docentes y coordinación. Los datos son ficticios y no crean cuentas reales.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {([
+                    ['estudiante', 'Estudiante'],
+                    ['profesor', 'Profesor'],
+                    ['coordinacion', 'Coordinación'],
+                  ] as [DemoRole, string][]).map(([role, label]) => (
+                    <button
+                      key={role}
+                      type="button"
+                      onClick={() => {
+                        setDemoRole(role);
+                        localStorage.setItem(DEMO_STORAGE_KEY, role);
+                        setAccountModalOpen(false);
+                      }}
+                      className={`border px-3 py-2 text-xs font-medium ${
+                        demoRole === role
+                          ? 'border-blue-800 bg-blue-800 text-white'
+                          : 'border-blue-300 bg-white text-blue-900 hover:border-blue-700'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -969,7 +1085,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-slate-400" aria-hidden="true" />
             <span>
-              EGIDA_MOODLE · Diplomado en Ciberseguridad (30 h · Escenario ficticio Andina Logística S.A.S.)
+              EGIDA_MOODLE · Diplomado en Ciberseguridad (40 h · Escenario ficticio Andina Logística S.A.S.)
             </span>
           </div>
           <span>

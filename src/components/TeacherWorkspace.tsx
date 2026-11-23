@@ -1255,7 +1255,7 @@ export function TeacherWorkspace({
       {activeTab === 'contenido' && (
         <div className="mt-6 border border-slate-200 bg-white p-6">
           <h2 className="font-display text-base font-semibold text-slate-900">
-            Control de publicación y muestra pública de solo lectura (B01–B15)
+            Control de publicación y muestra pública de solo lectura (B01–B15 y C01–C05)
           </h2>
           <p className="mt-1 text-xs text-slate-500">
             Controla qué bloques están publicados para matrícula activa y cuáles conforman la muestra pública de solo lectura.

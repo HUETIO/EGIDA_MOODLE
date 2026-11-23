@@ -5,7 +5,9 @@ import path from 'path';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
+  const demoMode = process.env.VITE_DEMO_MODE === 'true';
   return {
+    base: demoMode ? '/EGIDA_MOODLE/' : '/',
     plugins: [
       react(),
       tailwindcss(),

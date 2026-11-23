@@ -1099,7 +1099,7 @@ export function createApiRouter(
       coverImageUrl: z.string().max(300).optional(),
       coverImageKey: z.string().max(80).optional(),
       modality: z.enum(['Presencial', 'Híbrida sincrónica', 'Virtual asincrónica con sesiones sincrónicas']).optional(),
-      scheduleMode: z.enum(['8 jornadas (4 h)', '15 sesiones (2 h)']).optional(),
+      scheduleMode: z.enum(['8 jornadas (4 h)', '11 jornadas', '15 sesiones (2 h)']).optional(),
       passingScore: z.number().min(1).max(5).optional(),
       minAttendancePercent: z.number().int().min(50).max(100).optional(),
       aiPolicyNote: z.string().min(5).max(500).optional(),
